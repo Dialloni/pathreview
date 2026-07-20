@@ -23,7 +23,7 @@ language reflects the author's own source code. Two existing tests,
 
 **Branch name:** fix/150-tech-detector-vendored-files
 
-**Setup confirmation:** [ ] App runs locally at localhost:5173
+**Setup confirmation:** [x] App runs locally at localhost:5173
 
 **Cohort ledger:** [ ] Issue added to cohort ledger
 
