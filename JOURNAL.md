@@ -44,3 +44,51 @@ language reflects the author's own source code. Two existing tests,
   architectural and my first time in a codebase this size, so I stepped back and
   will do this Tier 1 first. If I finish before Week 10 I may pick up #102 as an
   optional second issue from a different tier.
+
+---
+
+## Week 8 — Reproduction & solution planning
+
+**Reproduction commit link:** _(this commit — link added in the follow-up commit
+that adds PLAN.md)_
+
+**Reproduction summary:**
+Ran `python -m pytest tests/unit/test_tech_detector.py` on the branch and got
+exactly the two failures the issue names — `test_node_modules_excluded` and
+`test_build_directory_excluded`, both `AssertionError: assert 'JavaScript' ==
+'Python'`. Probing `TechDetector._should_skip_file()` directly narrowed the
+cause: it returns `False` for `node_modules/lib/index.js` but `True` for both
+`/repo/node_modules/lib/index.js` and `frontend/node_modules/x.js`, so the
+slash-wrapped patterns only miss **top-level relative** vendored paths — which is
+exactly the shape the GitHub tree API returns.
+
+**PLAN.md link:** _(added in the follow-up commit)_
+
+**Walkthrough video (recommended):** _(not recorded)_
+
+**Blockers or open questions:**
+Separate from the skip logic, `_detect_tech()` picks `sorted(languages)[0]`, so
+`primary_language` is alphabetically first rather than "most common" as the
+comment on `agent/tools/tech_detector.py:125` claims — 6 `.py` files plus 1
+`.js` file still reports JavaScript. Fixing the skip logic alone makes both named
+tests pass, so I plan to keep the PR scoped to #150 and raise the counting bug
+with the maintainer separately. Also unsure whether the skip check should be
+case-insensitive (`Node_Modules/`); the existing extension matching is
+case-sensitive, so I lean toward not changing a second behavior silently.
+
+### Reproduction steps
+
+```bash
+git checkout fix/150-tech-detector-vendored-files
+source .venv/bin/activate
+python -m pytest tests/unit/test_tech_detector.py -q
+# => 2 failed, 25 passed
+
+python -c "
+from agent.tools.tech_detector import TechDetector
+d = TechDetector()
+print(d._should_skip_file('node_modules/lib/index.js'))            # False  <-- bug
+print(d._should_skip_file('/repo/node_modules/lib/index.js'))      # True
+print(d._should_skip_file('frontend/node_modules/x.js'))           # True
+"
+```
