@@ -49,8 +49,8 @@ language reflects the author's own source code. Two existing tests,
 
 ## Week 8 — Reproduction & solution planning
 
-**Reproduction commit link:** _(this commit — link added in the follow-up commit
-that adds PLAN.md)_
+**Reproduction commit link:**
+[`dfa76b3`](https://github.com/Dialloni/pathreview/commit/dfa76b3c79c06cb30965573ab5c4e6621b70ecc3)
 
 **Reproduction summary:**
 Ran `python -m pytest tests/unit/test_tech_detector.py` on the branch and got
@@ -62,7 +62,8 @@ cause: it returns `False` for `node_modules/lib/index.js` but `True` for both
 slash-wrapped patterns only miss **top-level relative** vendored paths — which is
 exactly the shape the GitHub tree API returns.
 
-**PLAN.md link:** _(added in the follow-up commit)_
+**PLAN.md link:**
+[PLAN.md](https://github.com/Dialloni/pathreview/blob/fix/150-tech-detector-vendored-files/PLAN.md)
 
 **Walkthrough video (recommended):** _(not recorded)_
 
