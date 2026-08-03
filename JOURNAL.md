@@ -129,7 +129,7 @@ pre-existing failures.
 
 ### Check-in 2 (end of week)
 
-**PR link:** _(to be added after the PR is opened)_
+**PR link:** https://github.com/ascherj/pathreview/pull/660
 
 **Branch:** `fix/150-tech-detector-vendored-files`
 
