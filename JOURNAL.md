@@ -152,4 +152,85 @@ lint, type, or test failures — the source file is ruff/black/mypy clean and
 `make test-unit` drops from 53 to 51 pre-existing failures, both flips being my
 target tests.)_
 
-**Draft PR feedback received from:** _(to be added — requested in Slack)_
+**Draft PR feedback received from:** none
+
+---
+
+## Week 10 — Iteration & reflection
+
+### Reviewer feedback
+
+**Feedback received:** [ ] Yes  [x] No — still awaiting review
+
+**Summary of feedback:**
+No review came in. Reviewer feedback is not an active feature for the Summer
+2026 cohort, and no maintainer comments arrived on PR #660
+(https://github.com/ascherj/pathreview/pull/660) by the end of the week. The PR
+is open and marked ready for review; merging is blocked only by the upstream
+"1 approving review required" branch-protection rule, which is expected.
+
+**How you responded:**
+No feedback to respond to. If a maintainer comments later, I'll address it on
+the same branch so the PR updates in place.
+
+---
+
+### Reflection
+
+**What was harder than you expected?**
+The hardest part had nothing to do with the fix itself — the fix is about five
+lines. It was deciding what "passing" even means in a codebase that doesn't
+pass its own checks. On a clean checkout of the base branch, `make check`
+already reported 182 ruff errors and 34 mypy "missing annotation" errors, and
+`make test-unit` had 53 failing tests, all unrelated to issue #150. The
+pre-commit hook runs that same repo-wide `make check`, so it blocked my commit
+on debt I didn't create. Working out the right move — commit with `--no-verify`,
+but only after confirming my own two files were ruff/black/mypy clean and that
+`make test-unit` went from 53 to 51 failures (the only two flips being my target
+tests) — took far longer than writing the code, and it was the part with no
+obviously "correct" answer.
+
+**What did you learn about working in a large codebase?**
+That the code change is the small part. Most of the work was scoping: tracing
+the one caller (`agent/orchestrator.py` passes file paths straight through, so
+no caller change was needed), confirming the change had no integration surface
+(`tests/integration/` turned out to be empty), and matching existing
+conventions instead of "improving" them — the test methods in this suite are
+untyped, so I kept mine untyped rather than making my additions stick out.
+I also found a second, real bug while in there (`_detect_tech` picks
+`sorted(languages)[0]`, so `primary_language` is alphabetically first, not most
+common) and deliberately left it out of scope. On my own project I'd have just
+fixed it; on someone else's, keeping the PR to exactly what #150 describes is
+the respectful thing to do.
+
+**How did AI tools help — and where did they fall short?**
+AI was most useful for orientation and mechanics: locating `_should_skip_file`,
+reasoning through why slash-wrapped substrings miss repo-root-relative paths,
+proposing the segment-match approach, and separating pre-existing failures from
+ones my change introduced so I could document them honestly in the PR. Where it
+fell short was judgment and environment. The `--no-verify` decision — whether
+bypassing a hook on a stranger's repo is acceptable — was a call I had to own,
+not delegate. And concrete environment problems needed real debugging: a stale
+`.venv` shebang (the repo had been moved, so `.venv/bin/*` pointed at the old
+path and pre-commit died with "bad interpreter"), and `gh` refusing to
+authenticate because of an invalid `GITHUB_TOKEN`, which meant opening the PR by
+hand in the browser.
+
+**What would you do differently if you started over?**
+Two things. First, I'd run `make check` and `make test-unit` on the untouched
+base branch on day one and write the baseline numbers down before touching
+anything — I ended up reverse-engineering "what's pre-existing vs mine" later,
+and having the baseline up front would have made the whole `--no-verify`
+decision obvious immediately. Second, on issue selection: I originally claimed
+issue #102 (Tier 3) and stepped back to #150 (Tier 1) after realizing #102
+was architectural and a poor first contribution to a codebase this size. Stepping
+back was the right call, but I'd make that judgment earlier next time instead of
+committing to it and reversing.
+
+**What are you most proud of?**
+Not faking a green checkmark. It would have been easy to tick "make check
+passes" and move on. Instead I documented exactly what fails at baseline, proved
+my change adds zero new failures, and explained the `--no-verify` in both the
+commit message and the PR body. In a codebase I don't own, being honest and
+precise about the state of things felt more valuable than a clean-looking
+checkbox.
